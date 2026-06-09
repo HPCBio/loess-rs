@@ -43,6 +43,8 @@ pub struct RegressionContext<'a, T: FloatLinalg + SolverLinalg> {
     pub use_robustness: bool,
     /// Robustness weights for the neighborhood
     pub robustness_weights: &'a [T],
+    /// User-assigned prior-case weights, indexed by global obs. index
+    pub prior_weights: &'a [T],
     /// Weight function (kernel)
     pub weight_function: WeightFunction,
     /// Fallback strategy for zero-weight cases
@@ -68,6 +70,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
         neighborhood: &'a Neighborhood<T>,
         use_robustness: bool,
         robustness_weights: &'a [T],
+        prior_weights: &'a [T],
         weight_function: WeightFunction,
         zero_weight_fallback: ZeroWeightFallback,
         polynomial_degree: PolynomialDegree,
@@ -83,6 +86,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
             neighborhood,
             use_robustness,
             robustness_weights,
+            prior_weights,
             weight_function,
             zero_weight_fallback,
             polynomial_degree,
@@ -148,6 +152,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
                 } else {
                     kernel_w
                 };
+                let w = w * self.prior_weights[neighbor_idx];
                 weights.push(w);
             }
 
@@ -182,6 +187,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
                 } else {
                     kernel_w
                 };
+                let w = w * self.prior_weights[neighbor_idx];
                 weights.push(w);
             }
 

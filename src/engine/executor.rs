@@ -432,6 +432,9 @@ pub struct LoessExecutor<T: FloatLinalg + SolverLinalg> {
     /// Number of predictor dimensions.
     pub dimensions: usize,
 
+    /// User-assigned prior (case) weights, indexed by observation. Empty = all 1.0.
+    pub prior_weights: Vec<T>,
+
     /// Distance metric for nD neighborhood computation.
     pub distance_metric: DistanceMetric<T>,
 
@@ -510,6 +513,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
             boundary_policy: BoundaryPolicy::default(),
             polynomial_degree: PolynomialDegree::default(),
             dimensions: 1,
+            prior_weights: Vec::new(),
             distance_metric: DistanceMetric::default(),
             surface_mode: SurfaceMode::default(),
             interpolation_vertices: None,

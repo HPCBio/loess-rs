@@ -312,6 +312,9 @@ pub struct LoessConfig<T: FloatLinalg + SolverLinalg> {
     /// Number of predictor dimensions (default: 1).
     pub dimensions: usize,
 
+    /// User-assigned prior (case) weights, indexed by observation. Empty = all 1.0
+    pub prior_weights: Vec<T>,
+
     /// Distance metric for nD neighborhood computation.
     pub distance_metric: DistanceMetric<T>,
 
@@ -543,6 +546,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
             .boundary_policy(config.boundary_policy)
             .polynomial_degree(config.polynomial_degree)
             .dimensions(config.dimensions)
+            .prior_weights(config.prior_weights.clone())
             .distance_metric(config.distance_metric.clone())
             .surface_mode(config.surface_mode)
             .interpolation_vertices(config.interpolation_vertices)
@@ -576,6 +580,12 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
     /// Set the kernel weight function.
     pub fn weight_function(mut self, wf: WeightFunction) -> Self {
         self.weight_function = wf;
+        self
+    }
+
+    /// Set user-assigned prior (case) weights.
+    pub fn prior_weights(mut self, w: Vec<T>) -> Self {
+        self.prior_weights = w;
         self
     }
 

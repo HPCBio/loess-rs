@@ -120,6 +120,9 @@ pub struct BatchLoessBuilder<T: FloatLinalg + DistanceLinalg + SolverLinalg> {
     /// Number of predictor dimensions (default: 1).
     pub dimensions: usize,
 
+    /// User-assigned prior (case) weights, indexed by observation. Empty = all 1.0.
+    pub prior_weights: Vec<T>,
+
     /// Distance metric for nD neighborhood computation.
     pub distance_metric: DistanceMetric<T>,
 
@@ -207,6 +210,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + SolverLinalg> Batch
             boundary_policy: BoundaryPolicy::default(),
             polynomial_degree: PolynomialDegree::default(),
             dimensions: 1,
+            prior_weights: Vec::new(),
             distance_metric: DistanceMetric::default(),
             cell: None,
             interpolation_vertices: None,
@@ -234,6 +238,12 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + SolverLinalg> Batch
     /// Set the smoothing fraction (span).
     pub fn fraction(mut self, fraction: T) -> Self {
         self.fraction = fraction;
+        self
+    }
+
+    /// Set user-assigned prior (case) weights, one per observation (like R's `weights=`).
+    pub fn weights(mut self, weights: Vec<T>) -> Self {
+        self.prior_weights = weights;
         self
     }
 

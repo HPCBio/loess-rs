@@ -837,3 +837,94 @@ fn test_batch_duplicate_x_values() {
         assert!(val.is_finite());
     }
 }
+
+// ============================================================================
+// Prior (case) weights
+// ============================================================================
+
+/// Uniform prior weights must reproduce the unweighted fit exactly
+#[test]
+fn test_uniform_prior_weights_are_noop() {
+    let n = 40;
+    let x: Vec<f64> = (0..n).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|v| 2.0 * v + (v * 0.3).sin()).collect();
+
+    let unweighted = Loess::new()
+        .fraction(0.4)
+        .adapter(Batch)
+        .build()
+        .unwrap()
+        .fit(&x, &y)
+        .unwrap();
+
+    // All weights equal to 5.0 — should change nothing.
+    let weighted = Loess::new()
+        .fraction(0.4)
+        .adapter(Batch)
+        .weights(vec![5.0; n])
+        .build()
+        .unwrap()
+        .fit(&x, &y)
+        .unwrap();
+
+    for (a, b) in unweighted.y.iter().zip(weighted.y.iter()) {
+        assert_relative_eq!(a, b, epsilon = 1e-9);
+    }
+}
+
+/// Heavily weighting lower of two competing points should pull the local
+/// fit toward it.
+#[test]
+fn test_prior_weights_shift_fit() {
+    // Two clusters of points near the same x location, different y levels.
+    let x: Vec<f64> = vec![0.0, 1.0, 2.0, 2.0, 2.0, 3.0, 4.0];
+    let y: Vec<f64> = vec![0.0, 1.0, 10.0, 10.0, 0.0, 1.0, 0.0];
+
+    let base = Loess::new()
+        .fraction(0.9)
+        .adapter(Batch)
+        .build()
+        .unwrap()
+        .fit(&x, &y)
+        .unwrap();
+
+    // Heavily weight the low point at x=2 (index 4), downweight the high ones.
+    let mut w = vec![1.0; x.len()];
+    w[2] = 0.01;
+    w[3] = 0.01;
+    w[4] = 100.0;
+
+    let pulled = Loess::new()
+        .fraction(0.9)
+        .adapter(Batch)
+        .weights(w)
+        .build()
+        .unwrap()
+        .fit(&x, &y)
+        .unwrap();
+
+    // Fit at x=2 should move downward tw point.
+    assert!(
+        pulled.y[4] < base.y[4],
+        "weighted fit {} should be below unweighted {}",
+        pulled.y[4],
+        base.y[4]
+    );
+}
+
+/// Wrong-length prior weights are rejected.
+#[test]
+fn test_prior_weights_wrong_length_errors() {
+    let x: Vec<f64> = (0..10).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.clone();
+
+    let result = Loess::new()
+        .fraction(0.5)
+        .adapter(Batch)
+        .weights(vec![1.0; 3]) // wrong length
+        .build()
+        .unwrap()
+        .fit(&x, &y);
+
+    assert!(result.is_err());
+}

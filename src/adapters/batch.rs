@@ -499,6 +499,25 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
     pub fn fit(self, x: &[T], y: &[T]) -> Result<LoessResult<T>, LoessError> {
         Validator::validate_inputs(x, y, self.config.dimensions)?;
 
+        if !self.config.prior_weights.is_empty() {
+            let n = y.len() / self.config.dimensions;
+            if self.config.prior_weights.len() != n {
+                return Err(LoessError::InvalidInput(
+                    "prior weights length must equal number of observations".into(),
+                ));
+            }
+            if self.config.prior_weights.iter().any(|&w| !w.is_finite() || w < T::zero()) {
+                return Err(LoessError::InvalidInput(
+                    "prior weights must be finite and non-negative".into(),
+                ));
+            }
+            if self.config.prior_weights.iter().all(|&w| w <= T::zero()) {
+                return Err(LoessError::InvalidInput(
+                    "prior weights cannot all be zero".into(),
+                ));
+            }
+        }
+        
         // KD-Tree handles unsorted data natively - no need to sort
 
         // Check grid resolution only for interpolation mode

@@ -517,7 +517,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                 ));
             }
         }
-        
+
         // KD-Tree handles unsorted data natively - no need to sort
 
         // Check grid resolution only for interpolation mode
@@ -553,6 +553,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
             boundary_policy: self.config.boundary_policy,
             polynomial_degree: self.config.polynomial_degree,
             dimensions: self.config.dimensions,
+            prior_weights: Vec::new(),
             distance_metric: self.config.distance_metric.clone(),
             cv_seed: self.config.cv_seed,
             surface_mode: self.config.surface_mode,

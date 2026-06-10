@@ -388,6 +388,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + SolverLinalg> Defau
             boundary_policy: BoundaryPolicy::default(),
             polynomial_degree: PolynomialDegree::default(),
             dimensions: 1,
+            prior_weights: Vec::new(),
             distance_metric: DistanceMetric::default(),
             surface_mode: SurfaceMode::default(),
             interpolation_vertices: None,

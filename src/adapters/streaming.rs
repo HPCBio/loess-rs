@@ -533,6 +533,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
             boundary_policy: self.config.boundary_policy,
             polynomial_degree: self.config.polynomial_degree,
             dimensions: self.config.dimensions,
+            prior_weights: Vec::new(),
             distance_metric: self.config.distance_metric.clone(),
             cv_fractions: None,
             cv_kind: None,

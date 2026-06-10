@@ -959,6 +959,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                     neighborhood,
                     false, // use_robustness
                     &workspace.executor_buffer.robustness_weights,
+                    &self.prior_weights,
                     self.weight_function,
                     self.zero_weight_fallback,
                     degree,
@@ -1134,6 +1135,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                                     neighborhood,
                                     true, // use_robustness
                                     &workspace.executor_buffer.robustness_weights,
+                                    &self.prior_weights,
                                     self.weight_function,
                                     self.zero_weight_fallback,
                                     degree,
@@ -1423,6 +1425,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                 neighborhood,
                 true, // use_robustness
                 robustness_weights,
+                &[],
                 self.weight_function,
                 ZeroWeightFallback::UseLocalMean, // CV fallback
                 self.polynomial_degree,
@@ -1530,6 +1533,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                 neighborhood_ref,
                 use_robustness,
                 robustness_weights,
+                &[],
                 self.weight_function,
                 self.zero_weight_fallback,
                 self.polynomial_degree,

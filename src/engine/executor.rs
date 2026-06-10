@@ -878,6 +878,16 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
         let n_total = ay.len();
         let is_augmented = n_total > n;
 
+        // Align prior weights to the (possibly augmented) data layout.
+        // mapping[aug_idx] = original_idx, so padded boundary points inherit
+        // the weight of the edge observation they extend. Empty stays empty
+        // (treated as all-1.0 downstream).
+        let aug_prior_weights: Vec<T> = if self.prior_weights.is_empty() {
+            Vec::new()
+        } else {
+            mapping.iter().map(|&orig| self.prior_weights[orig]).collect()
+        };
+
         let mut new_workspace;
         let workspace = if let Some(ws) = workspace {
             ws.ensure_capacity(n_total, dims, window_size, n_coeffs);
@@ -970,7 +980,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                     neighborhood,
                     false, // use_robustness
                     &workspace.executor_buffer.robustness_weights,
-                    &self.prior_weights,
+                    &aug_prior_weights,
                     self.weight_function,
                     self.zero_weight_fallback,
                     degree,
@@ -1146,7 +1156,7 @@ impl<T: FloatLinalg + DistanceLinalg + Debug + Send + Sync + 'static + SolverLin
                                     neighborhood,
                                     true, // use_robustness
                                     &workspace.executor_buffer.robustness_weights,
-                                    &self.prior_weights,
+                                    &aug_prior_weights,
                                     self.weight_function,
                                     self.zero_weight_fallback,
                                     degree,

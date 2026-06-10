@@ -255,6 +255,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
                 } else {
                     kernel_w
                 };
+                let w = w * self.prior_weights.get(neighbor_idx).copied().unwrap_or_else(T::one);
                 weights.push(w);
             }
 
@@ -503,6 +504,7 @@ impl<'a, T: FloatLinalg + SolverLinalg> RegressionContext<'a, T> {
             } else {
                 kernel_w
             };
+            let w = w * self.prior_weights.get(idx).copied().unwrap_or_else(T::one);
             sum_wy = sum_wy + w * self.y[idx];
             sum_w = sum_w + w;
         }
